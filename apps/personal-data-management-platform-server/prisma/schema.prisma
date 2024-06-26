@@ -1,0 +1,90 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model UserCommunication {
+  company   Company?  @relation(fields: [companyId], references: [id])
+  companyId String?   @db.ObjectId
+  createdAt DateTime  @default(now())
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  message   String?
+  timestamp DateTime?
+  updatedAt DateTime  @updatedAt
+  user      User?     @relation(fields: [userId], references: [id])
+  userId    String?   @db.ObjectId
+}
+
+model UserRequest {
+  company     Company?                    @relation(fields: [companyId], references: [id])
+  companyId   String?                     @db.ObjectId
+  createdAt   DateTime                    @default(now())
+  id          String                      @id @default(auto()) @map("_id") @db.ObjectId
+  requestType EnumUserRequestRequestType?
+  status      EnumUserRequestStatus?
+  updatedAt   DateTime                    @updatedAt
+  user        User?                       @relation(fields: [userId], references: [id])
+  userId      String?                     @db.ObjectId
+}
+
+model PrivacyAgreement {
+  company   Company?  @relation(fields: [companyId], references: [id])
+  companyId String?   @db.ObjectId
+  content   String?
+  createdAt DateTime  @default(now())
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  timestamp DateTime?
+  updatedAt DateTime  @updatedAt
+  version   String?
+}
+
+model Company {
+  companyDataItems   CompanyData[]
+  contactInfo        String?
+  createdAt          DateTime            @default(now())
+  id                 String              @id @default(auto()) @map("_id") @db.ObjectId
+  name               String?
+  privacyAgreements  PrivacyAgreement[]
+  updatedAt          DateTime            @updatedAt
+  userCommunications UserCommunication[]
+  userRequests       UserRequest[]
+}
+
+model CompanyData {
+  company   Company? @relation(fields: [companyId], references: [id])
+  companyId String?  @db.ObjectId
+  createdAt DateTime @default(now())
+  dataType  String?
+  dataValue Json?
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  updatedAt DateTime @updatedAt
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?  @db.ObjectId
+}
+
+model User {
+  companyDataItems   CompanyData[]
+  createdAt          DateTime            @default(now())
+  email              String?             @unique
+  firstName          String?
+  id                 String              @id @default(auto()) @map("_id") @db.ObjectId
+  lastName           String?
+  password           String
+  roles              Json
+  updatedAt          DateTime            @updatedAt
+  userCommunications UserCommunication[]
+  username           String              @unique
+  userRequests       UserRequest[]
+}
+
+enum EnumUserRequestRequestType {
+  Option1
+}
+
+enum EnumUserRequestStatus {
+  Option1
+}
